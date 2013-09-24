@@ -247,9 +247,9 @@ static ssize_t speaker_gain_show(struct kobject *kobj,
 {
         return sprintf(buf, "%u %u",
 			taiko_read(fauxsound_codec_ptr,
-				TAIKO_A_CDC_RX3_VOL_CTL_B2_CTL),
+				TAIKO_A_CDC_RX7_VOL_CTL_B2_CTL),
 			taiko_read(fauxsound_codec_ptr,
-				TAIKO_A_CDC_RX4_VOL_CTL_B2_CTL));
+				TAIKO_A_CDC_RX7_VOL_CTL_B2_CTL));
 
 }
 
@@ -262,9 +262,9 @@ static ssize_t speaker_gain_store(struct kobject *kobj,
 
 	if (calc_checksum(lval, rval, chksum)) {
 		taiko_write(fauxsound_codec_ptr,
-			TAIKO_A_CDC_RX3_VOL_CTL_B2_CTL, lval);
+			TAIKO_A_CDC_RX7_VOL_CTL_B2_CTL, lval);
 		taiko_write(fauxsound_codec_ptr,
-			TAIKO_A_CDC_RX4_VOL_CTL_B2_CTL, rval);
+			TAIKO_A_CDC_RX7_VOL_CTL_B2_CTL, rval);
 	}
 	return count;
 }
