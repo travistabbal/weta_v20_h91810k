@@ -145,10 +145,6 @@ int snd_hax_reg_access(unsigned int reg)
 		case TAIKO_A_RX_HPH_R_GAIN:
 		case TAIKO_A_RX_HPH_L_STATUS:
 		case TAIKO_A_RX_HPH_R_STATUS:
-			if (wcd9xxx_hw_revision == 1)
-				if (snd_ctrl_locked)
-					ret = 0;
-			break;
 		case TAIKO_A_CDC_RX1_VOL_CTL_B2_CTL:
 		case TAIKO_A_CDC_RX2_VOL_CTL_B2_CTL:
 		case TAIKO_A_CDC_RX3_VOL_CTL_B2_CTL:
