@@ -23,7 +23,9 @@
 #include <linux/mfd/wcd9xxx/wcd9320_registers.h>
 
 #define SOUND_CONTROL_MAJOR_VERSION	3
-#define SOUND_CONTROL_MINOR_VERSION	6
+#define SOUND_CONTROL_MINOR_VERSION	2
+
+#define REG_SZ	21
 
 extern struct snd_soc_codec *fauxsound_codec_ptr;
 extern int wcd9xxx_hw_revision;
@@ -35,10 +37,10 @@ unsigned int taiko_read(struct snd_soc_codec *codec, unsigned int reg);
 int taiko_write(struct snd_soc_codec *codec, unsigned int reg,
 		unsigned int value);
 
-#define REG_SZ	25
+
 static unsigned int cached_regs[] = {6, 6, 0, 0, 0, 0, 0, 0, 0, 0,
 			    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			    0, 0, 0, 0, 0 };
+			    0 };
 
 static unsigned int *cache_select(unsigned int reg)
 {
@@ -101,18 +103,6 @@ static unsigned int *cache_select(unsigned int reg)
 			break;
                 case TAIKO_A_CDC_TX10_VOL_CTL_GAIN:
 			out = &cached_regs[20];
-			break;
-		case TAIKO_A_RX_LINE_1_GAIN:
-			out = &cached_regs[21];
-			break;
-		case TAIKO_A_RX_LINE_2_GAIN:
-			out = &cached_regs[22];
-			break;
-		case TAIKO_A_RX_LINE_3_GAIN:
-			out = &cached_regs[23];
-			break;
-		case TAIKO_A_RX_LINE_4_GAIN:
-			out = &cached_regs[24];
 			break;
         }
 	return out;
@@ -330,45 +320,6 @@ static ssize_t headphone_pa_gain_store(struct kobject *kobj,
 	taiko_write(fauxsound_codec_ptr, TAIKO_A_RX_HPH_R_STATUS, out);
 	}
 	return count;
-}
-
-static unsigned int selected_reg = 0xdeadbeef;
-
-static ssize_t sound_reg_select_store(struct kobject *kobj,
-                struct kobj_attribute *attr, const char *buf, size_t count)
-{
-        sscanf(buf, "%u", &selected_reg);
-
-	return count;
-}
-
-static ssize_t sound_reg_read_show(struct kobject *kobj,
-                struct kobj_attribute *attr, char *buf)
-{
-	if (selected_reg == 0xdeadbeef)
-		return -1;
-	else
-		return sprintf(buf, "%u\n",
-			taiko_read(fauxsound_codec_ptr, selected_reg));
-}
-
-static ssize_t sound_reg_write_store(struct kobject *kobj,
-                struct kobj_attribute *attr, const char *buf, size_t count)
-{
-        unsigned int out, chksum;
-
-	sscanf(buf, "%u %u", &out, &chksum);
-	if (calc_checksum(out, 0, chksum)) {
-		if (selected_reg != 0xdeadbeef)
-			taiko_write(fauxsound_codec_ptr, selected_reg, out);
-	}
-	return count;
-}
-
-static ssize_t sound_control_hw_revision_show (struct kobject *kobj,
-		struct kobj_attribute *attr, char *buf)
-{
-	return sprintf(buf, "hw_revision: %i\n", wcd9xxx_hw_revision);
 }
 
 static ssize_t sound_control_version_show(struct kobject *kobj,
