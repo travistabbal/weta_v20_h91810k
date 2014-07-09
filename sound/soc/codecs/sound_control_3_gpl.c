@@ -22,7 +22,7 @@
 #include <linux/mfd/wcd9xxx/wcd9320_registers.h>
 
 #define SOUND_CONTROL_MAJOR_VERSION	3
-#define SOUND_CONTROL_MINOR_VERSION	5
+#define SOUND_CONTROL_MINOR_VERSION	3
 
 #define REG_SZ	21
 
@@ -316,7 +316,41 @@ static ssize_t headphone_pa_gain_store(struct kobject *kobj,
 	return count;
 }
 
-static ssize_t sound_control_version_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+static unsigned int selected_reg = 0xdeadbeef;
+
+static ssize_t sound_reg_select_store(struct kobject *kobj,
+                struct kobj_attribute *attr, const char *buf, size_t count)
+{
+        sscanf(buf, "%u", &selected_reg);
+
+	return count;
+}
+
+static ssize_t sound_reg_read_show(struct kobject *kobj,
+                struct kobj_attribute *attr, char *buf)
+{
+	if (selected_reg == 0xdeadbeef)
+		return -1;
+	else
+		return sprintf(buf, "%u\n",
+			taiko_read(fauxsound_codec_ptr, selected_reg));
+}
+
+static ssize_t sound_reg_write_store(struct kobject *kobj,
+                struct kobj_attribute *attr, const char *buf, size_t count)
+{
+        unsigned int out, chksum;
+
+	sscanf(buf, "%u %u", &out, &chksum);
+	if (calc_checksum(out, 0, chksum)) {
+		if (selected_reg != 0xdeadbeef)
+			taiko_write(fauxsound_codec_ptr, selected_reg, out);
+	}
+	return count;
+}
+
+static ssize_t sound_control_version_show(struct kobject *kobj,
+		struct kobj_attribute *attr, char *buf)
 {
 	return sprintf(buf, "version: %u.%u\n",
 			SOUND_CONTROL_MAJOR_VERSION,
@@ -339,24 +373,6 @@ static ssize_t sound_control_locked_show(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
 {
         return sprintf(buf, "%d\n", snd_ctrl_locked);
-}
-
-static ssize_t sound_control_rec_locked_store(struct kobject *kobj,
-                struct kobj_attribute *attr, const char *buf, size_t count)
-{
-	int inp;
-
-	sscanf(buf, "%d", &inp);
-
-	snd_rec_ctrl_locked = inp;
-
-	return count;
-}
-
-static ssize_t sound_control_rec_locked_show(struct kobject *kobj,
-		struct kobj_attribute *attr, char *buf)
-{
-        return sprintf(buf, "%d\n", snd_rec_ctrl_locked);
 }
 
 static struct kobj_attribute sound_reg_sel_attribute =
@@ -432,11 +448,9 @@ static struct attribute *sound_control_attrs[] =
 		&headphone_gain_attribute.attr,
 		&headphone_pa_gain_attribute.attr,
 		&sound_control_locked_attribute.attr,
-		&sound_control_rec_locked_attribute.attr,
 		&sound_reg_sel_attribute.attr,
 		&sound_reg_read_attribute.attr,
 		&sound_reg_write_attribute.attr,
-		&sound_hw_revision_attribute.attr,
 		&sound_control_version_attribute.attr,
 		NULL,
 	};
