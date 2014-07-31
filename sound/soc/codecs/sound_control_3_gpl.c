@@ -135,6 +135,9 @@ int snd_hax_reg_access(unsigned int reg)
 		case TAIKO_A_RX_HPH_R_GAIN:
 		case TAIKO_A_RX_HPH_L_STATUS:
 		case TAIKO_A_RX_HPH_R_STATUS:
+			if (snd_ctrl_locked > 1)
+				ret = 0;
+			break;
 		case TAIKO_A_CDC_RX1_VOL_CTL_B2_CTL:
 		case TAIKO_A_CDC_RX2_VOL_CTL_B2_CTL:
 		case TAIKO_A_CDC_RX3_VOL_CTL_B2_CTL:
@@ -142,10 +145,6 @@ int snd_hax_reg_access(unsigned int reg)
 		case TAIKO_A_CDC_RX5_VOL_CTL_B2_CTL:
 		case TAIKO_A_CDC_RX6_VOL_CTL_B2_CTL:
 		case TAIKO_A_CDC_RX7_VOL_CTL_B2_CTL:
-		case TAIKO_A_RX_LINE_1_GAIN:
-		case TAIKO_A_RX_LINE_2_GAIN:
-		case TAIKO_A_RX_LINE_3_GAIN:
-		case TAIKO_A_RX_LINE_4_GAIN:
 			if (snd_ctrl_locked > 0)
 				ret = 0;
 			break;
@@ -159,7 +158,7 @@ int snd_hax_reg_access(unsigned int reg)
 		case TAIKO_A_CDC_TX8_VOL_CTL_GAIN:
 		case TAIKO_A_CDC_TX9_VOL_CTL_GAIN:
 		case TAIKO_A_CDC_TX10_VOL_CTL_GAIN:
-			if (snd_rec_ctrl_locked > 0)
+			if (snd_ctrl_locked > 0)
 				ret = 0;
 			break;
 		default:
@@ -301,22 +300,18 @@ static ssize_t headphone_pa_gain_store(struct kobject *kobj,
 	if (calc_checksum(lval, rval, chksum)) {
 	gain = taiko_read(fauxsound_codec_ptr, TAIKO_A_RX_HPH_L_GAIN);
 	out = (gain & 0xf0) | lval;
-	if (wcd9xxx_hw_revision == 1)
 	taiko_write(fauxsound_codec_ptr, TAIKO_A_RX_HPH_L_GAIN, out);
 
 	status = taiko_read(fauxsound_codec_ptr, TAIKO_A_RX_HPH_L_STATUS);
 	out = (status & 0x0f) | (lval << 4);
-	if (wcd9xxx_hw_revision == 1)
 	taiko_write(fauxsound_codec_ptr, TAIKO_A_RX_HPH_L_STATUS, out);
 
 	gain = taiko_read(fauxsound_codec_ptr, TAIKO_A_RX_HPH_R_GAIN);
 	out = (gain & 0xf0) | rval;
-	if (wcd9xxx_hw_revision == 1)
 	taiko_write(fauxsound_codec_ptr, TAIKO_A_RX_HPH_R_GAIN, out);
 
 	status = taiko_read(fauxsound_codec_ptr, TAIKO_A_RX_HPH_R_STATUS);
 	out = (status & 0x0f) | (rval << 4);
-	if(wcd9xxx_hw_revision == 1)
 	taiko_write(fauxsound_codec_ptr, TAIKO_A_RX_HPH_R_STATUS, out);
 	}
 	return count;
