@@ -13,7 +13,7 @@ TOOLCHAIN=$HOME/kernel/toolchain/ndk/bin/aarch64-linux-android-
 CPU_THREADS=$(grep -c "processor" /proc/cpuinfo)
 THREADS=$((CPU_THREADS + 1))
 
-############## SCARY NO-TOUCHY STUFF ###############
+###
 
 ABORT() {
 	[ "$1" ] && echo "Error: $*"
