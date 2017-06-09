@@ -4,9 +4,8 @@
 # root directory of LGE msm8996 git repo (default is this script's location)
 RDIR=$(pwd)
 
-[ "$VER" ] ||
-# version number
-VER=$(cat "$RDIR/VERSION")
+VER=V1.1
+FIRM=h91810k
 
 
 TOOLCHAIN=$HOME/kernel/toolchain/ndk/bin/aarch64-linux-android-
@@ -41,7 +40,7 @@ ABORT "Config $DEFCONFIG not found in $ARCH configs!"
 ABORT "Device config $DEVICE_DEFCONFIG not found in $ARCH configs!"
 
 KDIR="$RDIR/build/arch/$ARCH/boot"
-export LOCALVERSION=$TARGET-$DEVICE-$VER
+export LOCALVERSION=WETA-$FIRM-$VER
 
 CLEAN_BUILD() {
 	echo "Cleaning build..."
