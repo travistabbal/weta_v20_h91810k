@@ -17,18 +17,6 @@
 /*
  * Change log:
  * 
- * 1.2.1 (28.09.2016)
- *   - Fix the completely broken mic gain sysfs not storing any settings
- *
- * 1.2.0 (26.09.2016)
- *   - Add general mic gain control + avoid speaker volume resets
- *
- * 1.1.1 (16.09.2016)
- *   - Fix speaker control (variable overflow)
- *
- * 1.1.0 (23.08.2016)
- *   - Add speaker control
- *
  * 1.0.0 (15.08.2016)
  *   - Initial version for OnePlus 3
  * 
@@ -253,15 +241,7 @@ static ssize_t speaker_volume_store(struct device *dev, struct device_attribute 
 
 static ssize_t mic_level_general_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
-	int val;
-
-	val = get_mic_gain_general();
-
-	// convert byte to signed int
-	if (val > 127)
-		val = (256 - val) * -1;
-
-	return sprintf(buf, "Mic level general %d\n", val);
+	return sprintf(buf, "Mic level general %d\n", mic_level);
 }
 
 
@@ -269,7 +249,7 @@ static ssize_t mic_level_general_store(struct device *dev, struct device_attribu
 					const char *buf, size_t count)
 {
 	unsigned int ret = -EINVAL;
-	int val;
+	unsigned int val;
 
 	// Terminate if boeffla sound is not enabled
 	if (!boeffla_sound)
@@ -289,8 +269,8 @@ static ssize_t mic_level_general_store(struct device *dev, struct device_attribu
 		val = MICLEVEL_MIN;
 
 	// store new value
-	mic_level_general = val;
-
+	mic_level = val;
+		
 	// set new value
 	tomtom_write_no_hook(codec, TOMTOM_A_CDC_TX4_VOL_CTL_GAIN, 
 		mic_level + MICLEVEL_REG_OFFSET);
