@@ -1,7 +1,7 @@
 /*
- * Author: andip71
+ * Author: andip71, 15.08.2016
  * 
- * Version 1.1.1
+ * Version 1.0.0
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -17,6 +17,12 @@
 /*
  * Change log:
  * 
+ * 1.2.1 (28.09.2016)
+ *   - Fix the completely broken mic gain sysfs not storing any settings
+ *
+ * 1.2.0 (26.09.2016)
+ *   - Add general mic gain control + avoid speaker volume resets
+ *
  * 1.1.1 (16.09.2016)
  *   - Fix speaker control (variable overflow)
  *
@@ -62,7 +68,7 @@ static void reset_boeffla_sound(void)
 
 static void reset_audio_hub(void)
 {
-	int tmp;
+	u16 tmp;
 	
 	// reset all audio hub registers back to defaults
 	set_headphone_gain_l(HEADPHONE_DEFAULT + HEADPHONE_REG_OFFSET);
@@ -191,7 +197,7 @@ static ssize_t headphone_volume_store(struct device *dev, struct device_attribut
 
 static ssize_t speaker_volume_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
-	int val;
+	u16 val;
 
 	val = get_speaker_gain();	// mono speaker, so we alwas treat L and R the same
 	val = (val >> 8) * -1;
@@ -208,7 +214,7 @@ static ssize_t speaker_volume_store(struct device *dev, struct device_attribute 
 	unsigned int ret = -EINVAL;
 	int val;
 	int val_unused;
-	int tmp;
+	u16 tmp;
 
 	// Terminate if boeffla sound is not enabled
 	if (!boeffla_sound)
